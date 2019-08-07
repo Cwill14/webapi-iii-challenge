@@ -4,19 +4,15 @@ const router = require('express').Router();
 
 const data = require('./userDb.js');
 
-router.post('/', (req, res) => {
+router.post('/', validateUser, (req, res) => {
     const userBody = req.body
-    if (userBody.name) {
-        data.insert(userBody)
-            .then(resource => {
-                res.status(201).json(userBody)
-            })
-            .catch(error => {
-                res.status(500).json({ error: "error posting user" })
-            })
-    } else {
-        res.status(400)({ error: " missing name field" })
-    }
+    data.insert(userBody)
+        .then(resource => {
+            res.status(201).json(userBody)
+        })
+        .catch(error => {
+            res.status(500).json({ error: "error posting user" })
+        })
 });
 
 router.post('/:id/posts', (req, res) => {
@@ -24,7 +20,6 @@ router.post('/:id/posts', (req, res) => {
 });
 
 router.get('/', (req, res, next) => {
-    console.log('hello from userRouter');
     data.get()
         .then(resources => {
             res.status(200).json(resources)
@@ -32,15 +27,11 @@ router.get('/', (req, res, next) => {
         .catch(error => {
             res.status(500).json({ error: "server error getting" })
         })
-    // next();
 });
 
 router.get('/:id', validateUserId, (req, res) => {
-// router.get('/:id', (req, res) => {
-    // const { id } = req.params;
     data.getById(req.user.id)
         .then(resource => {
-            // console.log(req.user);
             res.status(200).json(resource)
         })
         .catch(error => {
@@ -48,36 +39,38 @@ router.get('/:id', validateUserId, (req, res) => {
         })
 });
 
-router.get('/:id/posts', (req, res) => {
+router.get('/:id/posts', validateUserId, (req, res) => {
 
 });
 
-router.delete('/:id', (req, res) => {
-    const { id } = req.params;
-    // if (id) {
+router.delete('/:id', validateUserId, (req, res) => {
 
-    // }
-    data.remove(id)
-        .then(resource => {
+    data.remove(req.user.id)
+        .then(count => {
             // res.status(200).json({ message: "successfully deleted"})
-            res.status(200).json(resource)
+            res.status(200).json({ "count of deleted records": count})
         })
         .catch(error => {
             res.status(500).json({ error: "server error deleting by ID" })
         })
 });
 
-router.put('/:id', (req, res) => {
-
+router.put('/:id', validateUserId, validateUser, (req, res) => {
+    const changes = req.body;
+    data.update(req.user.id, changes)
+        .then(count => {
+            res.status(200).json({ "count of updated records": count})
+        })
+        .catch(err => {
+            res.status(500).json({ error: "error updating user" })
+        })
 });
 
 //custom middleware
 
 function validateUserId(req, res, next) {
     const { id } = req.params;
-    console.log(req.user);
     req.user = { id: id }
-    console.log(req.user);
     data.getById(id)
         .then(
             next()
@@ -88,7 +81,15 @@ function validateUserId(req, res, next) {
 };
 
 function validateUser(req, res, next) {
-
+    if (req.body) {
+        if (req.body.name) {
+            next()
+        } else {
+            res.status(400).json({ message: "missing required name field" })
+        }
+    } else {
+        res.status(400).json({ message: "missing user data" })
+    }
 };
 
 function validatePost(req, res, next) {
