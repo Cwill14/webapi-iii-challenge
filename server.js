@@ -1,6 +1,7 @@
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
+const userRouter = require('./users/userRouter.js');
 
 const server = express();
 
@@ -8,9 +9,11 @@ server.use(express.json());
 server.use(helmet());
 server.use(cors());
 
-server.get('/', logger, (req, res) => {
-  res.send(`<h2>Let's write some middleware!</h2>`)
-});
+// server.get('/', logger, (req, res) => {
+//   res.send(`<h2>Let's write some middleware!</h2>`)
+// });
+
+server.use('/', userRouter);
 
 //custom middleware
 
