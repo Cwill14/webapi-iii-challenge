@@ -13,7 +13,7 @@ server.use(logger)
 //   res.send(`<h2>Let's write some middleware!</h2>`)
 // });
 
-server.use('/', userRouter);
+server.use('/users', userRouter);
 
 //custom middleware
 

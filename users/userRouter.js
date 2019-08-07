@@ -35,11 +35,12 @@ router.get('/', (req, res, next) => {
     // next();
 });
 
-// router.get('/:id', validateUserId, (req, res) => {
-router.get('/:id', (req, res) => {
-    const { id } = req.params;
-    data.getById(id)
+router.get('/:id', validateUserId, (req, res) => {
+// router.get('/:id', (req, res) => {
+    // const { id } = req.params;
+    data.getById(req.user.id)
         .then(resource => {
+            // console.log(req.user);
             res.status(200).json(resource)
         })
         .catch(error => {
@@ -74,12 +75,16 @@ router.put('/:id', (req, res) => {
 
 function validateUserId(req, res, next) {
     const { id } = req.params;
-    if (id) {
-        req.user = { req}
-    } else {
-        res.status(400).json({ message: "invalid user id" })
-    }
-    next();
+    console.log(req.user);
+    req.user = { id: id }
+    console.log(req.user);
+    data.getById(id)
+        .then(
+            next()
+        )
+        .catch(error => {
+            res.status(400).json({ message: "invalid user id" })
+        })
 };
 
 function validateUser(req, res, next) {
