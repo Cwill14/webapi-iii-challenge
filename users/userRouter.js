@@ -3,20 +3,29 @@
 const router = require('express').Router();
 
 const data = require('./userDb.js');
+const pData = require('../posts/postDb');
 
 router.post('/', validateUser, (req, res) => {
     const userBody = req.body
     data.insert(userBody)
         .then(resource => {
-            res.status(201).json(userBody)
+            res.status(201).json({ "added user": userBody })
         })
         .catch(error => {
-            res.status(500).json({ error: "error posting user" })
+            res.status(500).json({ error: "server error posting user" })
         })
 });
 
-router.post('/:id/posts', (req, res) => {
-
+router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
+    const postBody = req.body;
+    console.log(postBody);
+    pData.insert(postBody)
+        .then(resource => {
+            res.status(201).json({ "added post": resource })
+        })
+        .catch(err => {
+            res.status(500).json({ error: "server error posting comment" })
+        })
 });
 
 router.get('/', (req, res, next) => {
@@ -25,7 +34,7 @@ router.get('/', (req, res, next) => {
             res.status(200).json(resources)
         })
         .catch(error => {
-            res.status(500).json({ error: "server error getting" })
+            res.status(500).json({ error: "server error getting users" })
         })
 });
 
@@ -35,12 +44,18 @@ router.get('/:id', validateUserId, (req, res) => {
             res.status(200).json(resource)
         })
         .catch(error => {
-            res.status(500).json({ error: "server error getting by ID" })
+            res.status(500).json({ error: "server error getting user by ID" })
         })
 });
 
 router.get('/:id/posts', validateUserId, (req, res) => {
-
+    data.getUserPosts(req.user.id)    
+        .then(posts => {
+            res.status(200).json(posts)
+        })
+        .catch(err => [
+            res.status(500).json({ error: "server error getting posts"})
+        ])
 });
 
 router.delete('/:id', validateUserId, (req, res) => {
@@ -62,7 +77,7 @@ router.put('/:id', validateUserId, validateUser, (req, res) => {
             res.status(200).json({ "count of updated records": count})
         })
         .catch(err => {
-            res.status(500).json({ error: "error updating user" })
+            res.status(500).json({ error: "server error updating user" })
         })
 });
 
@@ -93,7 +108,16 @@ function validateUser(req, res, next) {
 };
 
 function validatePost(req, res, next) {
-
+    if (req.body) {
+        if (req.body.text) {
+            console.log(req.body);
+            next()
+        } else {
+            res.status(400).json({ message: "missing required text field" })
+        }
+    } else {
+        res.status(400).json({ message: "missing post data" })
+    }
 };
 
 module.exports = router;
