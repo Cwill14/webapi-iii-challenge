@@ -1,0 +1,12 @@
+.App {
+  text-align: center;
+}
+nav {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .link {
+    margin: 1rem;
+  }
+}
+
