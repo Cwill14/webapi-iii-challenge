@@ -1,9 +1,9 @@
 import React from 'react';
 
-const User = () => {
+const User = props => {
     return (
         <div>
-            user
+            <h3>{props.user.name}</h3>
         </div>
     );
 };

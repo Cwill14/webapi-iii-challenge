@@ -1,11 +1,18 @@
-import React from 'react';
+import React, { useContext } from 'react';
 
 import User from './User';
+import { ListContext } from '../contexts/ListContext';
 
 const List = () => {
+    
+    const users = useContext(ListContext);
+
     return (
         <div>
-            <User />
+            {users.users.map(user => {
+                return <User user={user} key={user.id} />
+            })}
+            
         </div>
     );
 };

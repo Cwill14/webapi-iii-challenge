@@ -18,7 +18,7 @@ function App() {
     axios
       .get('https://web-api-challenge-3-heroku.herokuapp.com/users')
       .then(res => {
-        // console.log(res);
+        console.log(res);
         setUsers(res.data)
       })
       .catch(err => {
