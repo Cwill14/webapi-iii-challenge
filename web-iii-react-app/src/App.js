@@ -25,10 +25,10 @@ function App() {
         console.log(err);
       })
   }, [submitting])
-  
+
   return (
     <div className="App">
-      <ListContext.Provider value={{ users }}>
+      <ListContext.Provider value={{ users, setUsers }}>
         <Navigation />
         <Route exact path='/' component={List} />
         <Route path='/form' component={Form} />
